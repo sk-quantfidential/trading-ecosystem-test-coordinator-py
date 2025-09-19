@@ -1,6 +1,6 @@
 # Test Coordinator
 
-A sophisticated chaos engineering orchestrator built in Go that executes complex multi-service failure scenarios, validates system responses, and provides comprehensive scenario management for the trading ecosystem simulation.
+A sophisticated chaos engineering orchestrator built in Python that executes complex multi-service failure scenarios, validates system responses, and provides comprehensive scenario management for the trading ecosystem simulation.
 
 ## 🎯 Overview
 
@@ -58,7 +58,7 @@ The Test Coordinator serves as the central chaos engineering brain of the tradin
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Go 1.21+
+- Python 3.13+
 - Docker and Docker Compose
 - Access to all ecosystem service APIs
 - YAML scenario definitions
