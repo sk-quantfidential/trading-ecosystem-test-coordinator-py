@@ -462,33 +462,75 @@ class TestDataModels:
 
     def test_strategy_status_model(self):
         """Test StrategyStatus data model."""
-        # This will fail until implementation exists
-        with pytest.raises(ImportError):
-            from test_coordinator.infrastructure.grpc_clients import StrategyStatus
+        from test_coordinator.infrastructure.grpc_clients import StrategyStatus
+
+        strategy = StrategyStatus(
+            strategy_id="test_strategy",
+            status="ACTIVE",
+            positions=[],
+            last_updated="2025-09-24T00:00:00Z"
+        )
+        assert strategy.strategy_id == "test_strategy"
+        assert strategy.status == "ACTIVE"
+        assert isinstance(strategy.positions, list)
 
     def test_position_model(self):
         """Test Position data model."""
-        # This will fail until implementation exists
-        with pytest.raises(ImportError):
-            from test_coordinator.infrastructure.grpc_clients import Position
+        from test_coordinator.infrastructure.grpc_clients import Position
+
+        position = Position(
+            instrument_id="BTC/USD",
+            quantity=0.5,
+            value=25000.0,
+            side="LONG"
+        )
+        assert position.instrument_id == "BTC/USD"
+        assert position.quantity == 0.5
+        assert position.value == 25000.0
+        assert position.side == "LONG"
 
     def test_risk_report_model(self):
         """Test RiskReport data model."""
-        # This will fail until implementation exists
-        with pytest.raises(ImportError):
-            from test_coordinator.infrastructure.grpc_clients import RiskReport
+        from test_coordinator.infrastructure.grpc_clients import RiskReport
+
+        risk_report = RiskReport(
+            scenario_id="test_scenario",
+            timestamp="2025-09-24T00:00:00Z",
+            portfolio_value=1000000.0,
+            risk_metrics={"var_95": 50000.0}
+        )
+        assert risk_report.scenario_id == "test_scenario"
+        assert risk_report.portfolio_value == 1000000.0
+        assert "var_95" in risk_report.risk_metrics
 
     def test_chaos_event_model(self):
         """Test ChaosEvent data model."""
-        # This will fail until implementation exists
-        with pytest.raises(ImportError):
-            from test_coordinator.infrastructure.grpc_clients import ChaosEvent
+        from test_coordinator.infrastructure.grpc_clients import ChaosEvent
+
+        chaos_event = ChaosEvent(
+            event_type="latency_injection",
+            target_component="order_processor",
+            event_id="chaos_001",
+            timestamp="2025-09-24T00:00:00Z",
+            parameters={"latency_ms": 500}
+        )
+        assert chaos_event.event_type == "latency_injection"
+        assert chaos_event.target_component == "order_processor"
+        assert chaos_event.event_id == "chaos_001"
 
     def test_health_response_model(self):
         """Test HealthResponse data model."""
-        # This will fail until implementation exists
-        with pytest.raises(ImportError):
-            from test_coordinator.infrastructure.grpc_clients import HealthResponse
+        from test_coordinator.infrastructure.grpc_clients import HealthResponse
+
+        health = HealthResponse(
+            status="SERVING",
+            service="test-coordinator",
+            timestamp="2025-09-24T00:00:00Z",
+            details={"uptime": 3600}
+        )
+        assert health.status == "SERVING"
+        assert health.service == "test-coordinator"
+        assert "uptime" in health.details
 
 
 class TestCircuitBreakerAndRetry:
@@ -561,12 +603,15 @@ class TestConcurrentRequests:
         return Settings(environment="testing")
 
     @pytest.mark.asyncio
-    async def test_concurrent_client_creation(self, settings):
+    @patch('test_coordinator.infrastructure.grpc_clients.RiskMonitorClient.connect')
+    async def test_concurrent_client_creation(self, mock_connect, settings):
         """Test concurrent client creation."""
+        mock_connect.return_value = None
+
         manager = InterServiceClientManager(settings)
         await manager.initialize()
 
-        # This will fail until implementation exists
+        # Create multiple clients concurrently
         tasks = [
             manager.get_risk_monitor_client()
             for _ in range(5)
