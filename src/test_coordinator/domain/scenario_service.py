@@ -1,5 +1,6 @@
 """Core scenario orchestration business logic."""
 from typing import Dict, List, Any, Optional
+import uuid
 
 from test_coordinator.infrastructure.logging import get_logger
 
@@ -55,7 +56,7 @@ class ScenarioService:
                       target_service=target_service, chaos_type=chaos_type, parameters=parameters)
 
         # TODO: Implement actual chaos injection
-        injection_id = f"chaos-{target_service}-{chaos_type}-001"
+        injection_id = f"chaos-{target_service}-{chaos_type}-{str(uuid.uuid4())[:8]}"
         return injection_id
 
     async def validate_results(self, execution_id: str, expected_outcomes: List[Dict[str, Any]]) -> bool:
