@@ -10,40 +10,78 @@ authors = [
     {name = "Trading Ecosystem Team", email = "team@quantfidential.com"},
 ]
 dependencies = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "grpcio>=1.59.0",
-    "grpcio-tools>=1.59.0",
-    "structlog>=23.2.0",
-    "redis>=5.0.0",
-    "httpx>=0.25.0",
-    "pyyaml>=6.0.0",
-    "docker>=6.1.0",
-    "kubernetes>=28.1.0",
+    # FastAPI and HTTP server
+    "fastapi>=0.116.2",
+    "uvicorn[standard]>=0.36.0",
+
+    # Pydantic v2 with settings
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.10.1",
+
+    # gRPC core
+    "grpcio>=1.74.1",
+
+    # Logging and core runtime
+    "structlog>=24.4.0",
+
+    # Data persistence and caching (Redis-backed discovery)
+    "redis>=6.4.0",
+
+    # HTTP client (configuration service)
+    "httpx>=0.28.1",
 ]
 requires-python = ">=3.13"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
-    "mypy>=1.7.0",
-    "black>=23.11.0",
+    # Testing
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
+
+    # Code quality and formatting
+    "ruff>=0.13.1",
+    "mypy>=1.13.0",
+    "black>=24.10.0",
 ]
+
+# Future optional extras (uncomment when implemented/needed)
+# [project.optional-dependencies.observability]
+# opentelemetry-api = ">=1.37.0"
+# opentelemetry-sdk = ">=1.37.0"
+# opentelemetry-instrumentation-fastapi = ">=0.58b0"
+# opentelemetry-instrumentation-grpc = ">=0.58b0"
+# prometheus-client = ">=0.23.1"
+
+# [project.optional-dependencies.grpc-tools]
+# grpcio-tools = ">=1.74.1"
+# grpcio-status = ">=1.68.0"
+# grpcio-health-checking = ">=1.74.0"
+# grpcio-reflection = ">=1.68.0"
+
+# [project.optional-dependencies.persistence]
+# asyncpg = ">=0.29.0"
+# sqlalchemy = ">=2.0.0"
+
+# [project.optional-dependencies.ops]
+# pyyaml = ">=6.0.0"
+# docker = ">=6.1.0"
+# kubernetes = ">=28.1.0"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 path = "src/test_coordinator/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/test_coordinator"]
+packages = [{ include = "test_coordinator", from = "src" }]
 
 [tool.ruff]
 target-version = "py313"
 line-length = 88
+
+[tool.ruff.lint]
 select = ["E", "F", "UP", "B", "SIM", "I"]
 
 [tool.mypy]
@@ -54,13 +92,34 @@ warn_unused_configs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=src/test_coordinator",
+    "--cov=test_coordinator",
     "--cov-report=term-missing",
     "--cov-fail-under=85",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
 ]
