@@ -13,6 +13,9 @@ from test_coordinator.infrastructure.config import get_settings
 from test_coordinator.infrastructure.logging import setup_logging
 from test_coordinator.presentation.health import router as health_router
 
+# Data adapter integration
+from test_coordinator_data_adapter import AdapterFactory, AdapterConfig
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -22,11 +25,47 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     logger.info("Starting Test Coordinator service", version=settings.version)
 
+    # Initialize data adapter
+    adapter_config = AdapterConfig(
+        postgres_url=getattr(settings, 'postgres_url', AdapterConfig().postgres_url),
+        redis_url=getattr(settings, 'redis_url', AdapterConfig().redis_url),
+        service_name="test-coordinator",
+        service_version=settings.version,
+    )
+
+    adapter_factory = AdapterFactory(adapter_config)
+
+    # Store adapter factory in app state for route access
+    app.state.adapter_factory = adapter_factory
+
+    # Initialize connections (will use stubs if infrastructure not available)
+    try:
+        await adapter_factory.initialize()
+        health = await adapter_factory.health_check()
+        logger.info(
+            "Data adapter initialized",
+            postgres_connected=health["postgres"]["connected"],
+            redis_connected=health["redis"]["connected"],
+        )
+    except Exception as e:
+        logger.warning(
+            "Data adapter initialization failed, using stub repositories",
+            error=str(e),
+            error_type=type(e).__name__,
+        )
+
     # Startup logic here
     yield
 
     # Shutdown logic here
     logger.info("Shutting down Test Coordinator service")
+
+    # Cleanup data adapter
+    try:
+        await adapter_factory.cleanup()
+        logger.info("Data adapter cleaned up successfully")
+    except Exception as e:
+        logger.error("Data adapter cleanup failed", error=str(e))
 
 
 def create_app() -> FastAPI:
