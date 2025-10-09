@@ -30,8 +30,8 @@ dependencies = [
     # HTTP client (configuration service)
     "httpx>=0.28.1",
 
-    # Data adapter (local package)
-    "test-coordinator-data-adapter @ file:///${PROJECT_ROOT}/../test-coordinator-data-adapter-py",
+    # Data adapter installed separately in Dockerfile
+    # "test-coordinator-data-adapter" - installed via pip install /app/test-coordinator-data-adapter-py
 ]
 requires-python = ">=3.13"
 
