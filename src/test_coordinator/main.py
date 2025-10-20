@@ -11,10 +11,17 @@ from fastapi import FastAPI
 
 from test_coordinator.infrastructure.config import get_settings
 from test_coordinator.infrastructure.logging import setup_logging
+from test_coordinator.infrastructure.observability.metrics_middleware import (
+    create_red_metrics_middleware,
+)
+from test_coordinator.infrastructure.observability.prometheus_adapter import (
+    PrometheusMetricsAdapter,
+)
 from test_coordinator.presentation.health import router as health_router
+from test_coordinator.presentation.metrics import router as metrics_router
 
 # Data adapter integration
-from test_coordinator_data_adapter import AdapterFactory, AdapterConfig
+from test_coordinator_data_adapter import AdapterConfig, AdapterFactory
 
 
 @asynccontextmanager
@@ -80,6 +87,16 @@ def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
     settings = get_settings()
 
+    # Initialize Prometheus metrics adapter (Clean Architecture)
+    constant_labels = {
+        "service": settings.service_name,
+        "instance": settings.service_instance_name,
+        "version": settings.version,
+    }
+    metrics_port = PrometheusMetricsAdapter(constant_labels)
+    logger = structlog.get_logger()
+    logger.info("Prometheus metrics adapter initialized")
+
     app = FastAPI(
         title="Test Coordinator API",
         description="Scenario orchestration and chaos testing framework",
@@ -87,8 +104,15 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Store metrics_port for access in routes and middleware
+    app.state.metrics_port = metrics_port
+
+    # RED metrics middleware (Clean Architecture: uses MetricsPort)
+    app.middleware("http")(create_red_metrics_middleware(metrics_port))
+
     # Include routers
     app.include_router(health_router, prefix="/api/v1", tags=["health"])
+    app.include_router(metrics_router, prefix="/metrics", tags=["metrics"])
 
     return app
 

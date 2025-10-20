@@ -325,7 +325,7 @@ def test_scenario_starts_and_tracks_execution_state():
 mock_service_discovery.get_service.assert_called_with("risk-monitor")
 client = await client_manager.get_risk_monitor_client()
 assert client.host == "localhost"
-assert client.port == 9094
+assert client.port == 50051
 ```
 
 ### **Configuration Service Integration** ✅

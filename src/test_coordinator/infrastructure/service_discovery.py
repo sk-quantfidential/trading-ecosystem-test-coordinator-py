@@ -128,7 +128,7 @@ class ServiceDiscovery:
                 version=decoded_data.get("version", "unknown"),
                 host=decoded_data.get("host", "localhost"),
                 http_port=int(decoded_data.get("http_port", 8080)),
-                grpc_port=int(decoded_data.get("grpc_port", 9090)),
+                grpc_port=int(decoded_data.get("grpc_port", 50051)),
                 status=decoded_data.get("status", "unknown"),
                 last_heartbeat=decoded_data.get("last_heartbeat"),
                 metadata=decoded_data.get("metadata", {})
