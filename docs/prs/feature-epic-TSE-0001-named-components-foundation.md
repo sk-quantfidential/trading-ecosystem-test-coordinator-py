@@ -1,13 +1,72 @@
 # PR: Named Components Foundation (TSE-0001.12.0) - test-coordinator-py
 
-**Branch**: `feature/TSE-0001.12.0-named-components-foundation`
-**Epic**: TSE-0001 (Foundation Services & Infrastructure)
+**Branch**: `feature/epic-TSE-0001-named-components-foundation`
+**Epic**: epic-TSE-0001 (Foundation Services & Infrastructure)
+**Milestone**: TSE-0001.12.0 - Named Components Foundation
 **Status**: ✅ READY FOR REVIEW
 **Date**: 2025-10-09
 
 ## Summary
 
 Implements multi-instance infrastructure foundation for test-coordinator-py, enabling deployment as singleton (test-coordinator) or multi-instance (test-coordinator-Chaos1, test-coordinator-Chaos2) with automatic PostgreSQL schema and Redis namespace derivation via test-coordinator-data-adapter-py.
+
+---
+
+## What Changed
+
+### Phase 1: Named Components Foundation Implementation
+**Commit:** `84cb722` - Add named components foundation to test-coordinator-py
+
+- Added instance-aware configuration with service_name and service_instance_name
+- Enhanced health endpoint with instance, environment, timestamp fields
+- Implemented structured logging with instance context
+- Integrated data adapter with service identity
+- Updated Docker configuration for standardized ports (8080/50051)
+- Added comprehensive startup testing (19 new tests)
+
+### Phase 2: Configuration Fix
+**Commit:** `d991e0f` - Remove PROJECT_ROOT reference from pyproject.toml
+
+- Removed PROJECT_ROOT environment variable reference
+- Fixed dependency configuration for data adapter
+
+---
+
+## Testing
+
+### Test Coverage
+**Total: 174/174 tests passing (100% success rate)**
+- Existing tests: 155 tests (all passing)
+- New startup tests: 19 tests (instance awareness validation)
+
+### Test Execution
+```bash
+# Run all tests
+pytest tests/ -v --tb=short
+
+# Results:
+# tests/unit/test_startup.py::19 PASSED
+# tests/... (155 existing tests) PASSED
+# ====== 174 passed in 18.23s ======
+```
+
+### Test Categories
+- ✅ **Instance Awareness** - Service identity, instance derivation
+- ✅ **Configuration Validation** - Port standardization, environment settings
+- ✅ **Health Endpoint** - Instance metadata, timestamps
+- ✅ **Structured Logging** - Context binding, instance logging
+- ✅ **Data Adapter Integration** - Service identity propagation
+- ✅ **Backward Compatibility** - All existing tests still pass
+
+### Validation Passing
+All validation checks pass:
+- ✅ Repository structure validated
+- ✅ Git quality standards plugin present
+- ✅ GitHub Actions workflows configured
+- ✅ Documentation structure present
+- ✅ All markdown files valid
+
+---
 
 ## Changes Overview
 
