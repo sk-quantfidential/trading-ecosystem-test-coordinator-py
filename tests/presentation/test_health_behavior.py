@@ -43,6 +43,8 @@ class TestHealthCheckBehavior:
     def mock_settings(self):
         """Mock settings for testing."""
         settings = Mock(spec=Settings)
+        settings.service_name = "test-coordinator"
+        settings.service_instance_name = "test-coordinator"
         settings.version = "1.0.0"
         settings.environment = "testing"
         return settings
@@ -51,13 +53,18 @@ class TestHealthCheckBehavior:
     async def test_health_check_returns_healthy_status(self, mock_settings):
         """Behavior: Health check returns healthy status with service info."""
         with patch('test_coordinator.presentation.health.get_settings', return_value=mock_settings):
-            response = await health_check()
+            with patch('test_coordinator.presentation.health.datetime') as mock_datetime:
+                mock_datetime.now.return_value.isoformat.return_value = "2025-10-09T12:00:00Z"
+                response = await health_check()
 
         # Should return healthy status with service information
         assert isinstance(response, HealthResponse)
         assert response.status == "healthy"
         assert response.service == "test-coordinator"
+        assert response.instance == "test-coordinator"
         assert response.version == "1.0.0"
+        assert response.environment == "testing"
+        assert response.timestamp == "2025-10-09T12:00:00Z"
 
     @pytest.mark.asyncio
     @patch('test_coordinator.presentation.health.logger')
@@ -78,16 +85,24 @@ class TestHealthCheckBehavior:
         # Should have consistent response structure
         assert hasattr(response, 'status')
         assert hasattr(response, 'service')
+        assert hasattr(response, 'instance')
         assert hasattr(response, 'version')
+        assert hasattr(response, 'environment')
+        assert hasattr(response, 'timestamp')
         assert isinstance(response.status, str)
         assert isinstance(response.service, str)
+        assert isinstance(response.instance, str)
         assert isinstance(response.version, str)
+        assert isinstance(response.environment, str)
+        assert isinstance(response.timestamp, str)
 
     @pytest.mark.asyncio
     async def test_health_check_uses_current_settings(self):
         """Behavior: Health check reflects current application settings."""
         # Test with different settings
         test_settings = Mock(spec=Settings)
+        test_settings.service_name = "test-coordinator"
+        test_settings.service_instance_name = "test-coordinator-Chaos1"
         test_settings.version = "2.1.3"
         test_settings.environment = "production"
 
@@ -97,6 +112,8 @@ class TestHealthCheckBehavior:
         # Should reflect current settings
         assert response.version == "2.1.3"
         assert response.service == "test-coordinator"
+        assert response.instance == "test-coordinator-Chaos1"
+        assert response.environment == "production"
 
 
 class TestReadinessCheckBehavior:
@@ -169,39 +186,57 @@ class TestHealthResponseModel:
         response = HealthResponse(
             status="healthy",
             service="test-coordinator",
-            version="1.0.0"
+            instance="test-coordinator",
+            version="1.0.0",
+            environment="testing",
+            timestamp="2025-10-09T12:00:00Z"
         )
 
         assert response.status == "healthy"
         assert response.service == "test-coordinator"
+        assert response.instance == "test-coordinator"
         assert response.version == "1.0.0"
+        assert response.environment == "testing"
+        assert response.timestamp == "2025-10-09T12:00:00Z"
 
     def test_health_response_model_field_types(self):
         """Behavior: HealthResponse enforces correct field types."""
         response = HealthResponse(
             status="degraded",
             service="test-coordinator-dev",
-            version="0.9.0-beta"
+            instance="test-coordinator-dev-Chaos1",
+            version="0.9.0-beta",
+            environment="docker",
+            timestamp="2025-10-09T13:00:00Z"
         )
 
         # Should maintain field types
         assert isinstance(response.status, str)
         assert isinstance(response.service, str)
+        assert isinstance(response.instance, str)
         assert isinstance(response.version, str)
+        assert isinstance(response.environment, str)
+        assert isinstance(response.timestamp, str)
 
     def test_health_response_serialization(self):
         """Behavior: HealthResponse can be serialized for API responses."""
         response = HealthResponse(
             status="healthy",
             service="test-coordinator",
-            version="1.2.3"
+            instance="test-coordinator",
+            version="1.2.3",
+            environment="production",
+            timestamp="2025-10-09T14:00:00Z"
         )
 
         # Should be serializable to dict
         response_dict = response.model_dump()
         assert response_dict["status"] == "healthy"
         assert response_dict["service"] == "test-coordinator"
+        assert response_dict["instance"] == "test-coordinator"
         assert response_dict["version"] == "1.2.3"
+        assert response_dict["environment"] == "production"
+        assert response_dict["timestamp"] == "2025-10-09T14:00:00Z"
 
 
 class TestReadinessResponseModel:
@@ -274,7 +309,10 @@ class TestHealthRouterIntegration:
         """Behavior: Health endpoint returns proper HTTP response."""
         with patch('test_coordinator.presentation.health.get_settings') as mock_get_settings:
             mock_settings = Mock()
+            mock_settings.service_name = "test-coordinator"
+            mock_settings.service_instance_name = "test-coordinator"
             mock_settings.version = "1.0.0"
+            mock_settings.environment = "testing"
             mock_get_settings.return_value = mock_settings
 
             response = test_client.get("/health")
@@ -287,7 +325,10 @@ class TestHealthRouterIntegration:
         json_data = response.json()
         assert json_data["status"] == "healthy"
         assert json_data["service"] == "test-coordinator"
+        assert json_data["instance"] == "test-coordinator"
         assert json_data["version"] == "1.0.0"
+        assert json_data["environment"] == "testing"
+        assert "timestamp" in json_data
 
     def test_readiness_endpoint_http_response(self, test_client):
         """Behavior: Readiness endpoint returns proper HTTP response."""
@@ -307,7 +348,10 @@ class TestHealthRouterIntegration:
         """Behavior: Health endpoint only accepts GET requests."""
         with patch('test_coordinator.presentation.health.get_settings') as mock_get_settings:
             mock_settings = Mock()
+            mock_settings.service_name = "test-coordinator"
+            mock_settings.service_instance_name = "test-coordinator"
             mock_settings.version = "1.0.0"
+            mock_settings.environment = "testing"
             mock_get_settings.return_value = mock_settings
 
             # GET should work
@@ -338,7 +382,10 @@ class TestHealthSystemLoggingBehavior:
     async def test_health_check_logging_includes_context(self, mock_get_settings, mock_logger):
         """Behavior: Health check logging provides context for monitoring."""
         mock_settings = Mock()
+        mock_settings.service_name = "test-coordinator"
+        mock_settings.service_instance_name = "test-coordinator"
         mock_settings.version = "1.0.0"
+        mock_settings.environment = "testing"
         mock_get_settings.return_value = mock_settings
 
         await health_check()
@@ -361,7 +408,10 @@ class TestHealthSystemLoggingBehavior:
     async def test_multiple_health_checks_log_individually(self, mock_get_settings, mock_logger):
         """Behavior: Multiple health checks are logged individually."""
         mock_settings = Mock()
+        mock_settings.service_name = "test-coordinator"
+        mock_settings.service_instance_name = "test-coordinator"
         mock_settings.version = "1.0.0"
+        mock_settings.environment = "testing"
         mock_get_settings.return_value = mock_settings
 
         # Make multiple health check calls

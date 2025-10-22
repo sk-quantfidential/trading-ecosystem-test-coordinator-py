@@ -24,8 +24,8 @@ USER app
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8082/api/v1/health || exit 1
+    CMD curl -f http://localhost:8080/api/v1/health || exit 1
 
-EXPOSE 8082 9092
+EXPOSE 8080 50051
 
 CMD ["python", "-m", "test_coordinator.main"]
