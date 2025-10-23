@@ -57,7 +57,7 @@ This PR implements Prometheus metrics collection for test-coordinator-py using *
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Changes
+## What Changed
 
 ### 1. Domain Layer - MetricsPort Interface (NEW)
 
