@@ -68,7 +68,7 @@ All validation checks pass:
 
 ---
 
-## Changes Overview
+## What Changed
 
 ### 1. Instance-Aware Configuration (config.py)
 - Added `service_name: str` field (default: "test-coordinator")
