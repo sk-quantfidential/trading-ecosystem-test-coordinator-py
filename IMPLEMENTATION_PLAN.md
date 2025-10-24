@@ -19,7 +19,7 @@ Based on successful implementations in:
 **Current State:**
 - No `service_instance_name` field
 - No `environment: docker` support
-- Ports: 8082/9092 (non-standard for Python services)
+- Ports: 8080/50051 (non-standard for Python services)
 - No log_level validator
 
 **Target State:**
@@ -83,7 +83,7 @@ adapter_config = AdapterConfig(
 
 #### 5. Dockerfile
 **Current State:**
-- Ports: 8082/9092
+- Ports: 8080/50051
 - Health check: localhost:8082/api/v1/health
 
 **Target State:**
@@ -97,7 +97,7 @@ adapter_config = AdapterConfig(
 
 **Target State:**
 - Add test-coordinator service
-- Port mapping: 8087:8080, 50055:50051 (next available external ports)
+- Port mapping: 8087:8080, 50057:50051 (next available external ports)
 - IP: 172.20.0.87 (next available)
 - Environment variables for service identity
 

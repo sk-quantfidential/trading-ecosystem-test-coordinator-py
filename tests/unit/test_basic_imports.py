@@ -92,15 +92,15 @@ class TestBasicImports:
             name="test-coordinator",
             version="1.0.0",
             host="localhost",
-            http_port=8082,
-            grpc_port=9092,
+            http_port=8080,
+            grpc_port=50051,
             status="healthy"
         )
 
         assert service_info.name == "test-coordinator"
         assert service_info.host == "localhost"
-        assert service_info.http_port == 8082
-        assert service_info.grpc_port == 9092
+        assert service_info.http_port == 8080
+        assert service_info.grpc_port == 50051
         print("✅ ServiceInfo creation working")
 
     def test_constants_available(self):

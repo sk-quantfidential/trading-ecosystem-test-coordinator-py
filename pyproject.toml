@@ -21,13 +21,15 @@ dependencies = [
     # gRPC core
     "grpcio>=1.74.1",
 
-    # Logging and core runtime
+    # Async utilities and concurrency
+    "anyio>=4.6.0",
+    "asyncio-mqtt>=0.16.0",
+
+    # Logging and observability
     "structlog>=24.4.0",
+    "prometheus-client>=0.23.1",
 
-    # Data persistence and caching (Redis-backed discovery)
-    "redis>=6.4.0",
-
-    # HTTP client (configuration service)
+    # HTTP client and utilities
     "httpx>=0.28.1",
 
     # Data adapter installed separately in Dockerfile

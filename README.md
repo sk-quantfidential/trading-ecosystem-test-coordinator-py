@@ -1336,7 +1336,7 @@ COPY --from=builder /app/scenarios ./scenarios
 COPY --from=builder /app/templates ./templates
 COPY --from=builder /app/config ./config
 
-EXPOSE 8084 50056
+EXPOSE 8080 50051
 CMD ["./test-coordinator", "--config=config/config.yaml"]
 ```
 
@@ -1358,8 +1358,8 @@ services:
   test-coordinator:
     build: .
     ports:
-      - "8084:8084"
-      - "50056:50056"
+      - "8087:8080"
+      - "50057:50051"
     environment:
       - TEST_COORDINATOR_LOG_LEVEL=info
       - EXCHANGE_SIMULATOR_URL=http://exchange-simulator:8080

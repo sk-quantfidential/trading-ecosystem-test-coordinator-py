@@ -56,8 +56,8 @@ class TestInterServiceClientManager:
             name="risk-monitor",
             version="1.0.0",
             host="localhost",
-            http_port=8084,
-            grpc_port=9094,
+            http_port=8080,
+            grpc_port=50051,
             status="healthy"
         )
 
@@ -66,8 +66,8 @@ class TestInterServiceClientManager:
             name="trading-system-engine",
             version="1.0.0",
             host="localhost",
-            http_port=8081,
-            grpc_port=9091,
+            http_port=8080,
+            grpc_port=50051,
             status="healthy"
         )
 
@@ -138,7 +138,7 @@ class TestInterServiceClientManager:
 
         assert isinstance(client, RiskMonitorClient)
         assert client.host == "localhost"
-        assert client.port == 9094  # From mock service discovery
+        assert client.port == 50051  # From mock service discovery
         mock_service_discovery.get_service.assert_called_with("risk-monitor")
         mock_connect.assert_called_once()
 
@@ -170,7 +170,7 @@ class TestInterServiceClientManager:
 
         assert isinstance(client, TradingSystemEngineClient)
         assert client.host == "localhost"
-        assert client.port == 9091  # From mock service discovery
+        assert client.port == 50051  # From mock service discovery
         mock_service_discovery.get_service.assert_called_with("trading-system-engine")
         mock_connect.assert_called_once()
 
